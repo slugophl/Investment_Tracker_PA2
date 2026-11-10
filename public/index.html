@@ -14,7 +14,7 @@
         <h1>Investment Purchase Tracker</h1>
     </header>
     <main>
-        <section>
+        <section id="login-panel">
             <h2>Account</h2>
             <form id="auth-form">
                 <label for="email">Email</label>
@@ -25,11 +25,11 @@
                 
                 <button id="login-button" type="submit">Log in</button>
                 <button id="register-button" type="button">Register</button>
-                <button id="logout-button" type="button">Log out</button>
             </form>
-            <p id="account-status"></p>
         </section>
         <section id="tracker-panel" hidden>
+            <p id="account-status"></p>
+            <button id="logout-button" type="button">Log out</button>
             <h2>Purchase</h2>
             <form id="purchase-form" novalidate>
                 <label for="investment-name">Investment name</label>

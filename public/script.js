@@ -72,7 +72,8 @@ async function showTracker(user) {
   }
 
   byId('account-status').textContent = `Signed in as ${user.email}`;
-  byId('tracker-panel').hidden = false;
+  byId('tracker-panel').hidden = false; // Show purchase tracker panel
+  byId('login-panel').hidden = true; // Hide login panel
   await loadPurchases();
 }
 
@@ -193,10 +194,11 @@ byId('auth-form').addEventListener('submit', async(event) => {
   const loginButton = byId('login-button');
   loginButton.disabled = true;
   try {
-    await api('/api/login', { method: 'POST', body: { email: byId('email').value, password: byId('password').value } });
+    const user = await api('/api/login', { method: 'POST', body: { email: byId('email').value, password: byId('password').value } });
     await refreshCsrf();
-    await showTracker();
+    await showTracker(user);
     byId('password').value = '';
+    message.textContent = '';
   } catch (error) {
     message.textContent = `Login failed: ${error.message}`;
   } finally {
@@ -209,9 +211,11 @@ byId('register-button').addEventListener('click', async() => {
   const registerButton = byId('register-button');
   registerButton.disabled = true;
   try {
-    await api('/api/register', { method: 'POST', body: { email: byId('email').value, password: byId('password').value } });
-    message.textContent = 'Registration complete. Please log in.';
-    byId('password').value = '';
+    const registerResult = await api('/api/register', { method: 'POST', body: { email: byId('email').value, password: byId('password').value } });
+    if (registerResult) {
+      message.textContent = 'Registration complete. Please log in.';
+      byId('password').value = '';
+    }
   } catch (error) {
     message.textContent = `Registration failed: ${error.message}`;
   } finally {
@@ -231,7 +235,8 @@ byId('logout-button').addEventListener('click',async() => {
     resetEdit();
     byId('auth-form').reset();
     byId('account-status').textContent = '';
-    byId('tracker-panel').hidden = true;
+    byId('tracker-panel').hidden = true; // Hide purchase tracker panel
+    byId('login-panel').hidden = false; // Show login panel
   } catch (error) {
     message.textContent = `Logout failed: ${error.message}`;
   } finally {
@@ -243,8 +248,8 @@ async function initialize() {
   // F7: GET /api/me; showTracker when logged in; handle 401 as signed out.
   // Do not show an alarming error merely because a new visitor is not logged in.
   try {
-    await api('/api/me');
-    await showTracker();
+    const me = await api('/api/me');
+    await showTracker(me);
   } catch (error) {
     if (error.status !== 401) {
       message.textContent = `Failed to load account: ${error.message}`;

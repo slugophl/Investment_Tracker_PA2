@@ -16,19 +16,25 @@ const asyncRoute = fn => (req,res,next) => Promise.resolve(fn(req,res,next)).cat
 const todo = res => res.status(501).json({error:'Complete this numbered step'});
 
 // S1: Implement GET /api/health -> {ok:true}.
-app.get('/api/health', (req,res) => res.status(200).json({ok:true}));
+app.get('/api/health', (req,res) => res.json({ok:true}));
 
 // S2: Validate credentials. Normalize only email. Query duplicate email safely.
 // await argon2.hash(password,{type:argon2.argon2id}); insert email/hash; return 201 {id,email}.
 // Catch uniqueness conflicts as 409, without leaking SQL or hashes.
 app.post('/api/register', asyncRoute(async(req,res) => {
   const email = req.body.email.trim();
-  const pwd = req.body.password.trim();
-
-  if (!email || !pwd || pwd.length < 8 || pwd.length > 128) 
-    return res.status(400).json({error:'Invalid email or password value'});
+  const pwd = req.body.password;
 
   const emailNormalized = email.toLowerCase();
+  const emailRegexPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (emailNormalized.length < 3 || 
+      emailNormalized.length > 254 || 
+      !emailRegexPattern.test(emailNormalized) ||
+      typeof pwd !== 'string' || 
+      pwd.length < 8 || 
+      pwd.length > 128) 
+    return res.status(400).json({error:'Invalid email or password value'});
 
   try {
     const resultSelect = db.prepare('SELECT email FROM users WHERE email = ?').get(emailNormalized);
@@ -41,7 +47,7 @@ app.post('/api/register', asyncRoute(async(req,res) => {
   const hash = await argon2.hash(pwd, {type:argon2.argon2id});
   try {
     const result = db.prepare('INSERT INTO users (email,password_hash) VALUES (?,?)').run(emailNormalized,hash);
-    return res.status(201).json({id:result.lastInsertRowid,emailNormalized});
+    return res.status(201).json({id:result.lastInsertRowid,email:emailNormalized});
   } catch (error) {
     throw error;
   }
@@ -119,7 +125,7 @@ app.get('/api/purchases',requireAuth,(req,res)=> {
   // S8: return all owned records in ascending ID order.
   try {
     const purchases = db.prepare(`
-      SELECT p.id,p.name,p.quantity,p.unit_price_cents,p.category_id,c.name AS categoryName,p.quantity*p.unit_price_cents AS costCents
+      SELECT p.id,p.name,p.quantity,p.unit_price_cents AS unitPriceCents,p.category_id AS categoryId,c.name AS categoryName,p.quantity*p.unit_price_cents AS costCents
       FROM purchases p
       JOIN categories c ON c.id = p.category_id
       WHERE p.owner_id = ?
@@ -154,7 +160,7 @@ app.post('/api/purchases',requireAuth,(req,res)=> {
     );
 
     const purchase = db.prepare(`
-      SELECT p.id,p.name,p.quantity,p.unit_price_cents,p.category_id,c.name AS categoryName,p.quantity*p.unit_price_cents AS costCents
+      SELECT p.id,p.name,p.quantity,p.unit_price_cents AS unitPriceCents,p.category_id AS categoryId,c.name AS categoryName,p.quantity*p.unit_price_cents AS costCents
       FROM purchases p
       JOIN categories c ON c.id = p.category_id
       WHERE p.id = ?
@@ -203,7 +209,7 @@ app.put('/api/purchases/:id',requireAuth,(req,res)=> {
     );
 
     const purchase = db.prepare(`
-      SELECT p.id,p.name,p.quantity,p.unit_price_cents,p.category_id,c.name AS categoryName,p.quantity*p.unit_price_cents AS costCents
+      SELECT p.id,p.name,p.quantity,p.unit_price_cents AS unitPriceCents,p.category_id AS categoryId,c.name AS categoryName,p.quantity*p.unit_price_cents AS costCents
       FROM purchases p
       JOIN categories c ON c.id = p.category_id
       WHERE p.id = ?

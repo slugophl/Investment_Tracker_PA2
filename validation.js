@@ -11,13 +11,17 @@ function validatePurchase(body, validCategoryIds) {
   if (typeof name !== 'string' || name.trim() === '')
     return {valid:false, error:'Name is required'};
 
-  if (!Number.isInteger(quantity) || quantity <= 0)
-    return {valid:false, error:'Quantity must be an integer value greater than 0'};
+  const trimmedName = name.trim();
+  if (trimmedName.length < 1 || trimmedName.length > 100)
+    return {valid:false, error:'Name must be between 1 and 100 characters'};
 
-  if (!Number.isInteger(unitPriceCents) || unitPriceCents <= 0)
-    return {valid:false, error:'Unit price must be an integer value greater than 0'};
+  if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10000)
+    return {valid:false, error:'Quantity must be an integer value between 1 and 10,000'};
 
-  if (!validCategoryIds.includes(categoryId))
+  if (!Number.isInteger(unitPriceCents) || unitPriceCents < 1 || unitPriceCents > 100000000)
+    return {valid:false, error:'Unit price must be an integer value between 1 and 100,000,000 cents'};
+
+  if (!Number.isInteger(categoryId) || !validCategoryIds.includes(categoryId))
     return {valid:false, error:'Invalid category ID'};
 
   return {
