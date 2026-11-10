@@ -29,18 +29,18 @@ Do not submit .env, database files, node_modules, or .git.
 # Node.js
 Node.js is a JavaScript runtime that allows you to run JavaScript outside of the browser. It is primarily a backend, server-side runtime that coupled with Express allows you to handle HTTP requests and serve HTTP responses, and use middleware for things like logging, validation, and authentication.
 
-# Node Package Manager
+### Node Package Manager
 Node Package Manager (NPM) is the default package manager for Node.js that allows you to install libraries and tools, manage project dependencies, run scripts, and publish and share packages.
 
-# package-lock.json
+### package-lock.json
 NPM uses the package-lock.json file to track the dependencies and exact versions that were installed for use in the application. It makes installs faster and reproducible, and allows for easier collaboration by ensuring that all developers install and use the same dependencies.
 
-# Promise
+### Promise
 Using async / await to wait for Promises on the server (Node.js) allows for the server to handle multiple HTTP requests concurrently without blocking execution while a single request waits for execution of something like a database query to complete. This is especially helpful when the server needs to execute processes over the network, on the file system, or on a database, and keeps the server from processing requests synchronously.
 
 Similarly, using async / await to wait for Promises on the front-end allows for the browser to execute API calls without blocking execution of other processes on the browser while the API call executes to completion. This is especially helpful when the browser is interacting with API endpoints, and it keeps the browser from freezing up while waiting for an API process to complete.
 
-# Persistent Data and Validation
+### Persistent Data and Validation
 The users, purchases, and categories tables all have an id column declared as INTEGER PRIMARY KEY, which automatically increments the value of the id column by adding one to the highest previously used id. This enforces the uniqueness of the id value for each record, which is the purpose of declaring the id as a primary key.
 
 There are two foreign key relationships on the purchases table. One foreign key references the id in the users table and the other foreign key references the id in the categories table. This enforces referential integrity by making sure that the owner_id value in the purchases table is a valid user id in the users table, and that the category_id in the purchases table is a valid id in the categories table.
@@ -51,7 +51,7 @@ Relational storage fits these records because it allows for users and categories
 
 In a NoSQL document-style representation, the design would likely be a single purchases "table" to store all purchase documents. Each purchase document would contain the same properties as the purchases table in the SQLite database, and would also contain nested documents for users and categories. This would mean that users and categories would be duplicated across multiple purchase documents, making management of the users and categories unwieldy.
 
-# Authentication vs Authorization
+### Authentication vs Authorization
 Authentication is the process of verifying your identity and answering the question "Who are you?" Authorization is the process of determining what an authenticated user has access to and answering the question "What are you allowed to do?" In the two-user test, fictional user B was authenticated via the login process where they entered their email address and password to verify their identity. The two-user test demonstrated that fictional user B is authorized to see their own purchase transactions and create/edit purchase transactions for their own account, but they are not authorized to view fictional user A's purchases or create/edit purchase transactions on behalf of fictional user A for user A's account.
 
 Client-side validation alone is not sufficient because it runs in the web browser and can be bypassed either by disabling JavaScript, using developer tools to modify the DOM, or with direct API calls (as demonstrated in the two-user test). As such, the server should re-validate all inputs so that invalid data and requests are rejected when checks on the front-end are skipped.
