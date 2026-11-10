@@ -8,8 +8,13 @@ const message=byId('message');
 const saveButton=byId('save-button');
 function money(cents){return '$'+(cents/100).toFixed(2);}
 
-async function refreshCsrf(){
-  const response=await fetch('/api/csrf',{credentials:'same-origin'});
+async function refreshCsrf() {
+  let response;
+  try {
+    response=await fetch('/api/csrf',{credentials:'same-origin'});
+  } catch (error) {
+    throw new Error('Network connection failed');
+  }
   if(!response.ok) throw new Error('Could not initialize the session');
   csrfToken=(await response.json()).csrfToken;
 }
