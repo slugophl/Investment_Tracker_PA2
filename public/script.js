@@ -240,6 +240,7 @@ byId('logout-button').addEventListener('click',async() => {
     resetEdit();
     byId('auth-form').reset();
     byId('account-status').textContent = '';
+    byId('message').textContent = '';
     byId('tracker-panel').hidden = true; // Hide purchase tracker panel
     byId('login-panel').hidden = false; // Show login panel
   } catch (error) {
